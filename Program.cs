@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Threading;
 using System;
 
 namespace ChipEightEmu
@@ -10,12 +11,17 @@ namespace ChipEightEmu
             CPU chip8 = new CPU();
             chip8.Init();
 
-            chip8.Load(File.ReadAllBytes("C:\\Users\\Jan\\Downloads\\SQRT.ch8"));
+            chip8.Load(File.ReadAllBytes("C:\\Users\\Jan\\Downloads\\Picture.ch8"));
+
+            Console.SetWindowSize(64, 32);
+            Console.SetBufferSize(64, 32);            
 
             while (true)
             {
-                Console.ReadKey();
                 chip8.Cycle();
+
+
+                
             }
         }
     }

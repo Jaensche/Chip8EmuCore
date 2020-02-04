@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace ChipEightEmu
 {
@@ -16,7 +17,7 @@ namespace ChipEightEmu
         ushort I;
         ushort pc;
 
-        byte[] gfx = new byte[64 * 32];
+        int[] gfx = new int[64 * 32];
 
         byte delay_timer;
         byte sound_timer;
@@ -58,13 +59,17 @@ namespace ChipEightEmu
             pc = 0x200;  // Program counter starts at 0x200
             I = 0;      // Reset index register
             sp = 0;      // Reset stack pointer
-            
-            // Clear display	
-            
+
+            // Clear display
+            for (int i = 0; i < gfx.Length; i++)
+            {
+                gfx[i] = 0;
+            }
+
             // Clear stack
-            
+
             // Clear registers V0-VF
-            for(int i=0; i<v.Length; i++)
+            for (int i=0; i<v.Length; i++)
             {
                 v[i] = 0;
             }
@@ -89,8 +94,6 @@ namespace ChipEightEmu
             // Load Opcode
             ushort opcode = (ushort)(memory[pc] << 8 | (byte)memory[pc + 1]);
 
-            Console.WriteLine(opcode.ToString("X4"));
-
             // Decode Opcode
             // Execute Opcode
             DecodeExecute(opcode);
@@ -105,6 +108,23 @@ namespace ChipEightEmu
                     Console.WriteLine("BEEP!");
                 --sound_timer;
             }
+
+            Console.Clear();
+            for(int x=0; x<64; x++)
+            {
+                for (int y = 0; y < 32; y++)
+                {
+                    if (gfx[x+y*64] != 0)
+                    {
+                        Console.Write("#");
+                    }
+                    else
+                    {
+                        Console.Write(" ");
+                    }
+                }
+            }
+            Thread.Sleep(500);
         }
 
         public void Load(byte[] programCode)
@@ -128,7 +148,10 @@ namespace ChipEightEmu
                     {
                         case 0x0000: // 0x00E0: Clears the screen        
                             {
-                                Console.WriteLine("Clear Screen");
+                                for (int i = 0; i < gfx.Length; i++)
+                                {
+                                    gfx[i] = 0;
+                                }
                                 pc += 2;
                             }
                             break;
@@ -377,7 +400,28 @@ namespace ChipEightEmu
                     {
                         byte x = (byte)((opcode & 0x0F00) >> 8);
                         byte y = (byte)((opcode & 0x00F0) >> 4);
+                        byte n = (byte)((opcode & 0x000F));
+
+                        byte[] sprite = new byte[n];
+                        for (int a = 0; a < n; a++)
+                        {
+                            sprite[a] = memory[I + a];
+                        }
+
+                        for (int a = 0; a < n; a++)
+                        {
+                            for(int b=1; b<=128; b*=2)
+                            {
+                                int gfxAddress = x + b + (y * a * 64);
+                                if (gfxAddress < gfx.Length) // hack in place of wraparound
+                                {
+                                    gfx[gfxAddress] = sprite[a] & b;
+                                }
+                            }
+                        }
+
                         Console.WriteLine("Draw Sprite");
+
                         pc += 2;
                     }
                     break;
@@ -462,7 +506,8 @@ namespace ChipEightEmu
                                 break;
                             case 0x0029: // FX29 : Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
                                 {
-                                    Console.WriteLine("Sprite Font");
+                                    byte x = (byte)((opcode & 0x0F00) >> 8);
+                                    I = (byte)(0x80 + 5 * v[x]);
                                     pc += 2;
                                 }
                                 break;
