@@ -11,7 +11,7 @@ namespace ChipEightEmu
             CPU chip8 = new CPU();
             chip8.Init();
 
-            chip8.Load(File.ReadAllBytes("C:\\Users\\Jan\\Downloads\\Picture.ch8"));
+            chip8.Load(File.ReadAllBytes("C:\\Users\\Jan\\Downloads\\rand.ch8"));
 
             Console.SetWindowSize(64, 32);
             Console.SetBufferSize(64, 32);            

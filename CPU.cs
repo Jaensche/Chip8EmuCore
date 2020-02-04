@@ -109,22 +109,8 @@ namespace ChipEightEmu
                 --sound_timer;
             }
 
-            Console.Clear();
-            for(int x=0; x<64; x++)
-            {
-                for (int y = 0; y < 32; y++)
-                {
-                    if (gfx[x+y*64] != 0)
-                    {
-                        Console.Write("#");
-                    }
-                    else
-                    {
-                        Console.Write(" ");
-                    }
-                }
-            }
-            Thread.Sleep(500);
+            DrawGraphics();
+            Thread.Sleep(50);
         }
 
         public void Load(byte[] programCode)
@@ -135,6 +121,25 @@ namespace ChipEightEmu
             {
                 memory[PROGRAM_MEM_START + i] = programCode[i];
             }
+        }
+
+        private void DrawGraphics()
+        {
+            Console.Clear();
+            for (int x = 0; x < 64; x++)
+            {
+                for (int y = 0; y < 32; y++)
+                {
+                    if (gfx[x + y * 64] != 0)
+                    {
+                        Console.Write("#");
+                    }
+                    else
+                    {
+                        Console.Write(" ");
+                    }
+                }
+            }            
         }
 
         private void DecodeExecute(ushort opcode)
@@ -470,7 +475,7 @@ namespace ChipEightEmu
                                 break;
                             case 0x000A: // FX0A : A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
                                 {
-                                    Console.WriteLine("Await Key");
+                                    Console.ReadKey();  //hack
                                     pc += 2;
                                 }
                                 break;
