@@ -18,10 +18,7 @@ namespace ChipEightEmu
 
             while (true)
             {
-                chip8.Cycle();
-
-
-                
+                chip8.Cycle();                
             }
         }
     }

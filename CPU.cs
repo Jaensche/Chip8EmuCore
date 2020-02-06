@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Windows.Input;
 
 namespace ChipEightEmu
 {
@@ -17,7 +18,7 @@ namespace ChipEightEmu
         ushort I;
         ushort pc;
 
-        int[] gfx = new int[64 * 32];
+        byte[,] gfx = new byte[64, 32];
 
         byte delay_timer;
         byte sound_timer;
@@ -25,7 +26,7 @@ namespace ChipEightEmu
         ushort[] stack = new ushort[32];
         ushort sp;
 
-        byte[] key = new byte[16];
+        byte[,] keys = new byte[4, 4];
 
         static readonly byte[] FONTSET =
         {
@@ -49,9 +50,12 @@ namespace ChipEightEmu
 
         Random rand;
 
+        private bool redrawFlag;
+
         public CPU()
         {
             rand = new Random();
+            redrawFlag = false;
         }
 
         public void Init()
@@ -60,16 +64,11 @@ namespace ChipEightEmu
             I = 0;      // Reset index register
             sp = 0;      // Reset stack pointer
 
-            // Clear display
-            for (int i = 0; i < gfx.Length; i++)
-            {
-                gfx[i] = 0;
-            }
-
-            // Clear stack
+            // Clear screen
+            ClearScreen();
 
             // Clear registers V0-VF
-            for (int i=0; i<v.Length; i++)
+            for (int i = 0; i < v.Length; i++)
             {
                 v[i] = 0;
             }
@@ -87,10 +86,15 @@ namespace ChipEightEmu
             }
 
             // Reset timers
+            delay_timer = 0;
+            sound_timer = 0;
         }
 
         public void Cycle()
         {
+            // read keys
+            ReadKeys();
+
             // Load Opcode
             ushort opcode = (ushort)(memory[pc] << 8 | (byte)memory[pc + 1]);
 
@@ -109,54 +113,101 @@ namespace ChipEightEmu
                 --sound_timer;
             }
 
-            DrawGraphics();
-            Thread.Sleep(50);
+            if (redrawFlag)
+            {
+                DrawGraphics();
+                redrawFlag = false;
+            }
+
+            Thread.Sleep(10);
+        }
+
+        private void ReadKeys()
+        {
+            /*         
+            ╔═══╦═══╦═══╦═══╗
+            ║ 1 ║ 2 ║ 3 ║ C ║
+            ╠═══╬═══╬═══╬═══╣
+            ║ 4 ║ 5 ║ 6 ║ D ║
+            ╠═══╬═══╬═══╬═══╣
+            ║ 7 ║ 8 ║ 9 ║ E ║
+            ╠═══╬═══╬═══╬═══╣
+            ║ A ║ 0 ║ B ║ F ║
+            ╚═══╩═══╩═══╩═══╝
+             */
+
+            if (Console.KeyAvailable)
+            {
+                ConsoleKeyInfo key = Console.ReadKey(true);
+
+                if ((int)key.Key >= 97 && (int)key.Key <= 105)
+                {
+                    int value = (int)key.Key - 96;
+                    keys[value % 3, value / 3] = 1;
+                }
+
+                if ((int)key.Key >= 67 && (int)key.Key <= 70)
+                {
+                    int value = (int)key.Key - 67;
+                    keys[3, value] = 1;
+                }
+
+                switch (key.Key)
+                {
+                    case ConsoleKey.NumPad0:
+                        keys[0, 3] = 1;
+                        break;
+
+                    case ConsoleKey.A:
+                        keys[0, 3] = 1;
+                        break;
+
+                    case ConsoleKey.B:
+                        keys[2, 3] = 1;
+                        break;
+                }
+            }
         }
 
         public void Load(byte[] programCode)
         {
-            const int PROGRAM_MEM_START = 0x200;
+            const int PROGMEMSTART = 0x200;
 
             for (int i = 0; i < programCode.Length; i++)
             {
-                memory[PROGRAM_MEM_START + i] = programCode[i];
+                memory[PROGMEMSTART + i] = programCode[i];
             }
         }
 
         private void DrawGraphics()
         {
             Console.Clear();
-            for (int x = 0; x < 64; x++)
+            for (int y = 0; y < 32; y++)
             {
-                for (int y = 0; y < 32; y++)
+                for (int x = 0; x < 64; x++)
                 {
-                    if (gfx[x + y * 64] != 0)
+                    if (gfx[x, y] != 0)
                     {
-                        Console.Write("#");
+                        Console.Write("█");
                     }
                     else
                     {
                         Console.Write(" ");
                     }
                 }
-            }            
+            }
         }
 
         private void DecodeExecute(ushort opcode)
         {
             switch (opcode & 0xF000)
             {
-                // Some opcodes //
-
                 case 0x0000:
                     switch (opcode & 0x000F)
                     {
                         case 0x0000: // 0x00E0: Clears the screen        
                             {
-                                for (int i = 0; i < gfx.Length; i++)
-                                {
-                                    gfx[i] = 0;
-                                }
+                                ClearScreen();
                                 pc += 2;
                             }
                             break;
@@ -171,15 +222,15 @@ namespace ChipEightEmu
 
                         default:
                             {
-                                Console.WriteLine("Unknown opcode: ", opcode);
+                                throw new Exception("unknown opcode: " + opcode);
                             }
-                            break;
                     }
                     break;
 
                 case 0x1000: // 1NNN: Jumps to address NNN. 
-                    { 
-                        pc = (ushort)(opcode & 0x0FFF); 
+                    {
+                        ushort nnn = (ushort)(opcode & 0x0FFF);
+                        pc = nnn;
                     }
                     break;
 
@@ -232,7 +283,7 @@ namespace ChipEightEmu
                         byte x = (byte)((opcode & 0x0F00) >> 8);
                         byte nn = (byte)(opcode & 0x00FF);
                         v[x] = nn;
-                        pc += 2;                        
+                        pc += 2;
                     }
                     break;
 
@@ -288,15 +339,13 @@ namespace ChipEightEmu
                             case 0x0004: // 8XY4: Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
-                                    byte y = (byte)((opcode & 0x00F0) >> 4);  
-                                    if((v[x] + v[y]) > 254)
+                                    byte y = (byte)((opcode & 0x00F0) >> 4);
+                                    if ((v[x] + v[y]) > 254)
                                     {
-                                        //v[x] = (byte)(254 - v[x] + v[y]);
                                         v[15] = 1;
                                     }
                                     else
                                     {
-                                        //v[x] = (byte)(v[x] + v[y]);
                                         v[15] = 0;
                                     }
                                     pc += 2;
@@ -357,9 +406,8 @@ namespace ChipEightEmu
 
                             default:
                                 {
-                                    Console.WriteLine("Unknown opcode: ", opcode);
+                                    throw new Exception("unknown opcode: " + opcode);
                                 }
-                                break;
                         }
                     }
                     break;
@@ -368,7 +416,7 @@ namespace ChipEightEmu
                     {
                         byte x = (byte)((opcode & 0x0F00) >> 8);
                         byte y = (byte)((opcode & 0x00F0) >> 4);
-                        if(v[x] != v[y])
+                        if (v[x] != v[y])
                         {
                             pc += 4;
                         }
@@ -378,14 +426,16 @@ namespace ChipEightEmu
 
                 case 0xA000: // ANNN: Sets I to the address NNN
                     {
-                        I = (ushort)(opcode & 0x0FFF);
+                        ushort nnn = (ushort)(opcode & 0x0FFF);
+                        I = nnn;
                         pc += 2;
                     }
                     break;
 
                 case 0xB000: // BNNN: Jumps to the address NNN plus V0. 
                     {
-                        pc = (ushort)((opcode & 0x0FFF) + v[0]);
+                        ushort nnn = (ushort)(opcode & 0x0FFF);
+                        pc = (ushort)(nnn + v[0]);
                     }
                     break;
 
@@ -413,25 +463,28 @@ namespace ChipEightEmu
                             sprite[a] = memory[I + a];
                         }
 
-                        for (int a = 0; a < n; a++)
+                        for (int spriteCounter = 0; spriteCounter < n; spriteCounter++)
                         {
-                            for(int b=1; b<=128; b*=2)
+                            for (int bitCounter = 0; bitCounter < 8; bitCounter++)
                             {
-                                int gfxAddress = x + b + (y * a * 64);
-                                if (gfxAddress < gfx.Length) // hack in place of wraparound
-                                {
-                                    gfx[gfxAddress] = sprite[a] & b;
-                                }
+                                int xAddress = v[x] + bitCounter;
+                                int yAddress = v[y] + spriteCounter;
+
+                                xAddress = xAddress % 64;
+                                yAddress = yAddress % 32;
+
+                                byte pixel = (byte)((sprite[spriteCounter] & (0b10000000 >> bitCounter)) >> (7 - bitCounter));
+                                gfx[xAddress, yAddress] = (byte)(gfx[xAddress, yAddress] ^ pixel);
                             }
                         }
 
-                        Console.WriteLine("Draw Sprite");
+                        redrawFlag = true;
 
                         pc += 2;
                     }
                     break;
 
-                case 0xE000: 
+                case 0xE000:
                     {
                         switch (opcode & 0x00FF)
                         {
@@ -455,9 +508,8 @@ namespace ChipEightEmu
 
                             default:
                                 {
-                                    Console.WriteLine("Unknown opcode: ", opcode);
+                                    throw new Exception("unknown opcode: " + opcode);
                                 }
-                                break;
                         }
                     }
                     break;
@@ -502,7 +554,7 @@ namespace ChipEightEmu
                                         v[15] = 1;
                                     }
                                     else
-                                    { 
+                                    {
                                         I = (ushort)(I + v[x]);
                                         v[15] = 0;
                                     }
@@ -512,7 +564,7 @@ namespace ChipEightEmu
                             case 0x0029: // FX29 : Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font.
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
-                                    I = (byte)(0x80 + 5 * v[x]);
+                                    I = (byte)(5 * v[x]);
                                     pc += 2;
                                 }
                                 break;
@@ -538,7 +590,7 @@ namespace ChipEightEmu
                                 break;
                             case 0x0055: // FX55 : Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
                                 {
-                                    for(int i=0; i<16; i++)
+                                    for (int i = 0; i < 16; i++)
                                     {
                                         memory[I + i] = v[i];
                                     }
@@ -547,7 +599,7 @@ namespace ChipEightEmu
                                 break;
                             case 0x0065: // FX65 : Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
                                 {
-                                    for(int i = 0; i < 16; i++)
+                                    for (int i = 0; i < 16; i++)
                                     {
                                         v[i] = memory[I + i];
                                     }
@@ -557,21 +609,28 @@ namespace ChipEightEmu
 
                             default:
                                 {
-                                    Console.WriteLine("Unknown opcode: ", opcode);
+                                    throw new Exception("unknown opcode: " + opcode);
                                 }
-                                break;
                         }
                     }
                     break;
 
                 default:
-                    { 
-                        Console.WriteLine("Unknown opcode: ", opcode); 
+                    {
+                        throw new Exception("unknown opcode: " + opcode);
                     }
-                    break;
             }
         }
 
-       
+        private void ClearScreen()
+        {
+            for (int y = 0; y < gfx.GetLength(1); y++)
+            {
+                for (int x = 0; x < gfx.GetLength(0); x++)
+                {
+                    gfx[x, y] = 0;
+                }
+            }
+        }
     }
 }
