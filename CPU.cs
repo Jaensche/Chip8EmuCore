@@ -464,11 +464,15 @@ namespace ChipEightEmu
                         byte y = (byte)((opcode & 0x00F0) >> 4);
                         byte n = (byte)((opcode & 0x000F));
 
+                        // get sprite from memory
                         byte[] sprite = new byte[n];
                         for (int a = 0; a < n; a++)
                         {
                             sprite[a] = memory[I + a];
                         }
+
+                        // VF should be 0 when no pixels are flipped set to unset
+                        v[0x0F] = 0;
 
                         for (int spriteCounter = 0; spriteCounter < n; spriteCounter++)
                         {
@@ -477,10 +481,16 @@ namespace ChipEightEmu
                                 int xAddress = v[x] + bitCounter;
                                 int yAddress = v[y] + spriteCounter;
 
+                                // wrap around x and y addresses
                                 xAddress = xAddress % 64;
                                 yAddress = yAddress % 32;
 
                                 byte pixel = (byte)((sprite[spriteCounter] & (0b10000000 >> bitCounter)) >> (7 - bitCounter));
+                                
+                                // set VF to 1 if one pixel is flipped from set to unset
+                                v[0x0F] = (byte)(v[0x0F] | (gfx[xAddress, yAddress] & pixel));
+
+                                // xor bit to graphics
                                 gfx[xAddress, yAddress] = (byte)(gfx[xAddress, yAddress] ^ pixel);
                             }
                         }

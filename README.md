@@ -5,5 +5,5 @@ Chip8 Emulator in .NET Core
 * Handle keyboard input
 * ~~Decrement timers at 60Hz~~
 * ~~Proper execution speed limit~~
-* Sprite overlap detection
+* ~~Sprite overlap detection~~
 * Replace console output with graphics
