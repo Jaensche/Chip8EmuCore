@@ -52,6 +52,8 @@ namespace ChipEightEmu
 
         private bool redrawFlag;
 
+        int instructionCount = 0;
+
         public CPU()
         {
             rand = new Random();
@@ -90,7 +92,7 @@ namespace ChipEightEmu
             sound_timer = 0;
         }
 
-        public void Cycle()
+        public void Cycle(int cyclesPer60Hz)
         {
             // read keys
             ReadKeys();
@@ -103,15 +105,20 @@ namespace ChipEightEmu
             DecodeExecute(opcode);
 
             // Update timers
-            if (delay_timer > 0)
-                --delay_timer;
-
-            if (sound_timer > 0)
+            instructionCount++;
+            if (instructionCount == cyclesPer60Hz)
             {
-                if (sound_timer == 1)
-                    Console.WriteLine("BEEP!");
-                --sound_timer;
-            }
+                if (delay_timer > 0)
+                    --delay_timer;
+
+                if (sound_timer > 0)
+                {
+                    if (sound_timer == 1)
+                        Console.Beep();
+                    --sound_timer;
+                }
+                instructionCount = 0;
+            }            
 
             if (redrawFlag)
             {
