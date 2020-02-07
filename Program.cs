@@ -7,8 +7,8 @@ namespace ChipEightEmu
 {
     class Program
     {
-        const int ClockSpeedInHz = 540;
-        const int CounterSpeedInHz = 60;
+        const int ClockFrequency = 540;
+        const int CounterFrequency = 60;
 
         static void Main(string[] args)
         {
@@ -21,12 +21,10 @@ namespace ChipEightEmu
             Console.SetBufferSize(64, 32);
 
             Stopwatch stopWatch = new Stopwatch();
-            int microsecondsPerCycle = 1000000 / ClockSpeedInHz;
-            
-            bool emulationIsRunning = true;
+            int microsecondsPerCycle = 1000000 / ClockFrequency;
+            int cyclesPer60Hz = ClockFrequency / CounterFrequency;
 
-            int cyclesPer60Hz = ClockSpeedInHz / CounterSpeedInHz;
-
+            bool emulationIsRunning = true;     
             while (emulationIsRunning)
             {
                 stopWatch.Restart();
