@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Input;
+using System.Linq;
 
 namespace ChipEightEmu
 {
@@ -26,7 +27,7 @@ namespace ChipEightEmu
         ushort[] stack = new ushort[32];
         ushort sp;
 
-        byte[,] keys = new byte[4, 4];
+        bool[] keys = new bool[16];
 
         static readonly byte[] FONTSET =
         {
@@ -143,34 +144,78 @@ namespace ChipEightEmu
             ╚═══╩═══╩═══╩═══╝
              */
 
+            for(int i=0; i<keys.Length; i++)
+            {
+                keys[i] = false;
+            }
+
             if (Console.KeyAvailable)
             {
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
-                if ((int)key.Key >= 97 && (int)key.Key <= 105)
-                {
-                    int value = (int)key.Key - 96;
-                    keys[value % 3, value / 3] = 1;
-                }
-
-                if ((int)key.Key >= 67 && (int)key.Key <= 70)
-                {
-                    int value = (int)key.Key - 67;
-                    keys[3, value] = 1;
-                }
-
                 switch (key.Key)
                 {
-                    case ConsoleKey.NumPad0:
-                        keys[0, 3] = 1;
+                    case ConsoleKey.NumPad1:keys[0 + 0 * 4] = true;
+                        break;
+
+                    case ConsoleKey.NumPad2:
+                        keys[1 + 0* 4] = true;
+                        break;
+
+                    case ConsoleKey.NumPad3:
+                        keys[2 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.NumPad4:
+                        keys[3 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.Q:
+                        keys[0 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.W:
+                        keys[1 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.E:
+                        keys[2 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.R:
+                        keys[3 + 3 * 4] = true;
                         break;
 
                     case ConsoleKey.A:
-                        keys[0, 3] = 1;
+                        keys[0 + 3 * 4] = true;
                         break;
 
-                    case ConsoleKey.B:
-                        keys[2, 3] = 1;
+                    case ConsoleKey.S:
+                        keys[1 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.D:
+                        keys[2+ 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.F:
+                        keys[3 + 3 * 4] = true;
+                        break;                                 
+
+                    case ConsoleKey.Y:
+                        keys[0 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.X:
+                        keys[1 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.C:
+                        keys[2 + 3 * 4] = true;
+                        break;
+
+                    case ConsoleKey.V:
+                        keys[3 + 3 * 4] = true;
                         break;
                 }
             }
@@ -277,7 +322,7 @@ namespace ChipEightEmu
                     {
                         byte x = (byte)((opcode & 0x0F00) >> 8);
                         byte y = (byte)((opcode & 0x00F0) >> 4);
-                        if (v[x] == y)
+                        if (v[x] == v[y])
                         {
                             pc += 4;
                         }
@@ -388,7 +433,7 @@ namespace ChipEightEmu
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
                                     byte y = (byte)((opcode & 0x00F0) >> 4);
-                                    if ((v[x] - v[y]) < 0)
+                                    if ((v[y] - v[x]) < 0)
                                     {
                                         v[x] = (byte)(254 + v[x] - v[y]);
                                         v[15] = 0;
@@ -405,7 +450,7 @@ namespace ChipEightEmu
                             case 0x000E: // 8XYE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
-                                    v[15] = (byte)(v[x] & 0x80);
+                                    v[15] = (byte)((v[x] & 0x80) >> 7);
                                     v[x] = (byte)(v[x] << 4);
                                     pc += 2;
                                 }
@@ -508,8 +553,10 @@ namespace ChipEightEmu
                             case 0x009E: // EX9E : Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block) 
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
-                                    Console.WriteLine("Key Pressed? " + v[x]);
-                                    //if(key()==Vx) pc += 4;
+                                    if (keys[v[x]] == true)
+                                    {
+                                        pc += 4;
+                                    }
                                     pc += 2;
                                 }
                                 break;
@@ -517,8 +564,10 @@ namespace ChipEightEmu
                             case 0x00A1: // EXA1 : Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block)  
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
-                                    Console.WriteLine("Key Pressed? " + v[x]);
-                                    //if(key()!=Vx) pc += 4;
+                                    if (keys[v[x]] == false)
+                                    {
+                                        pc += 4;
+                                    }
                                     pc += 2;
                                 }
                                 break;
@@ -544,8 +593,16 @@ namespace ChipEightEmu
                                 break;
                             case 0x000A: // FX0A : A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
                                 {
-                                    Console.ReadKey();  //hack
-                                    pc += 2;
+                                    byte x = (byte)((opcode & 0x0F00) >> 8);
+                                    for(int i=0; i<keys.Length; i++)
+                                    {
+                                        if (keys[i] == true)
+                                        {
+                                            v[x] = (byte)i;
+                                            pc += 2;
+                                            break;
+                                        }
+                                    }
                                 }
                                 break;
                             case 0x0015: // FX15 : Sets the delay timer to VX. 
@@ -607,19 +664,21 @@ namespace ChipEightEmu
                                 break;
                             case 0x0055: // FX55 : Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
                                 {
-                                    for (int i = 0; i < 16; i++)
+                                    byte x = (byte)((opcode & 0x0F00) >> 8);
+                                    for (int i = 0; i <= x; i++)
                                     {
                                         memory[I + i] = v[i];
-                                    }
+                                    }                                    
                                     pc += 2;
                                 }
                                 break;
                             case 0x0065: // FX65 : Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
                                 {
-                                    for (int i = 0; i < 16; i++)
+                                    byte x = (byte)((opcode & 0x0F00) >> 8);
+                                    for (int i = 0; i <= x; i++)
                                     {
                                         v[i] = memory[I + i];
-                                    }
+                                    }                                    
                                     pc += 2;
                                 }
                                 break;

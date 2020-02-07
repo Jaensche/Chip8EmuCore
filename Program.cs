@@ -15,7 +15,7 @@ namespace ChipEightEmu
             CPU chip8 = new CPU();
             chip8.Init();
 
-            chip8.Load(File.ReadAllBytes("C:\\Users\\Jan\\Downloads\\IBM.ch8"));
+            chip8.Load(File.ReadAllBytes(@"R:\DEV\Chip8EmuCore\games\BC_test.ch8"));
 
             Console.SetWindowSize(64, 32);
             Console.SetBufferSize(64, 32);
