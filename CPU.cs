@@ -156,51 +156,52 @@ namespace ChipEightEmu
 
                 switch (key.Key)
                 {
-                    case ConsoleKey.NumPad1:keys[0 + 0 * 4] = true;
+                    case ConsoleKey.NumPad1:
+                        keys[0 + 0 * 4] = true;
                         break;
 
                     case ConsoleKey.NumPad2:
-                        keys[1 + 0* 4] = true;
+                        keys[1 + 0 * 4] = true;
                         break;
 
                     case ConsoleKey.NumPad3:
-                        keys[2 + 3 * 4] = true;
+                        keys[2 + 0 * 4] = true;
                         break;
 
                     case ConsoleKey.NumPad4:
-                        keys[3 + 3 * 4] = true;
+                        keys[3 + 0 * 4] = true;
                         break;
 
                     case ConsoleKey.Q:
-                        keys[0 + 3 * 4] = true;
+                        keys[0 + 1 * 4] = true;
                         break;
 
                     case ConsoleKey.W:
-                        keys[1 + 3 * 4] = true;
+                        keys[1 + 1 * 4] = true;
                         break;
 
                     case ConsoleKey.E:
-                        keys[2 + 3 * 4] = true;
+                        keys[2 + 1 * 4] = true;
                         break;
 
                     case ConsoleKey.R:
-                        keys[3 + 3 * 4] = true;
+                        keys[3 + 1 * 4] = true;
                         break;
 
                     case ConsoleKey.A:
-                        keys[0 + 3 * 4] = true;
+                        keys[0 + 2 * 4] = true;
                         break;
 
                     case ConsoleKey.S:
-                        keys[1 + 3 * 4] = true;
+                        keys[1 + 2 * 4] = true;
                         break;
 
                     case ConsoleKey.D:
-                        keys[2+ 3 * 4] = true;
+                        keys[2 + 2 * 4] = true;
                         break;
 
                     case ConsoleKey.F:
-                        keys[3 + 3 * 4] = true;
+                        keys[3 + 2 * 4] = true;
                         break;                                 
 
                     case ConsoleKey.Y:
