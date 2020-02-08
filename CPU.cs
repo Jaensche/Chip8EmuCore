@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Windows.Input;
 using System.Linq;
+using System.Text;
 
 namespace ChipEightEmu
 {
@@ -236,17 +237,19 @@ namespace ChipEightEmu
             Console.Clear();
             for (int y = 0; y < 32; y++)
             {
+                StringBuilder line = new StringBuilder();
                 for (int x = 0; x < 64; x++)
                 {
                     if (gfx[x, y] != 0)
                     {
-                        Console.Write("█");
+                        line.Append("█");
                     }
                     else
                     {
-                        Console.Write(" ");
+                        line.Append(" ");
                     }
                 }
+                Console.WriteLine(line.ToString());
             }
         }
 
@@ -668,7 +671,7 @@ namespace ChipEightEmu
                                     for (int i = 0; i <= x; i++)
                                     {
                                         memory[I + i] = v[i];
-                                    }                                    
+                                    } 
                                     pc += 2;
                                 }
                                 break;
@@ -678,9 +681,10 @@ namespace ChipEightEmu
                                     for (int i = 0; i <= x; i++)
                                     {
                                         v[i] = memory[I + i];
-                                    }                                    
+                                    }
                                     pc += 2;
                                 }
+                               
                                 break;
 
                             default:
