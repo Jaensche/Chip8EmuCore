@@ -186,7 +186,7 @@ namespace ChipEightEmu
                         byte nn = (byte)(opcode & 0x00FF);
                         if (_v[x] == nn)
                         {
-                            _pc += 4;
+                            _pc += 2;
                         }
                         _pc += 2;
                     }
@@ -198,7 +198,7 @@ namespace ChipEightEmu
                         byte nn = (byte)(opcode & 0x00FF);
                         if (_v[x] != nn)
                         {
-                            _pc += 4;
+                            _pc += 2;
                         }
                         _pc += 2;
                     }
@@ -210,7 +210,7 @@ namespace ChipEightEmu
                         byte y = (byte)((opcode & 0x00F0) >> 4);
                         if (_v[x] == _v[y])
                         {
-                            _pc += 4;
+                            _pc += 2;
                         }
                         _pc += 2;
                     }
@@ -357,7 +357,7 @@ namespace ChipEightEmu
                         byte y = (byte)((opcode & 0x00F0) >> 4);
                         if (_v[x] != _v[y])
                         {
-                            _pc += 4;
+                            _pc += 2;
                         }
                         _pc += 2;
                     }
@@ -456,7 +456,7 @@ namespace ChipEightEmu
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
                                     if (_keys[_v[x]] == false)
                                     {
-                                        _pc += 4;
+                                        _pc += 2;
                                     }
                                     _pc += 2;
                                 }
@@ -539,15 +539,10 @@ namespace ChipEightEmu
                                  */
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
-                                    byte temp = _v[x];
-
-                                    int hundreds = temp / 100;
-                                    int tens = (temp - hundreds) / 10;
-                                    int ones = (temp - hundreds - tens);
-
-                                    _mem[_I] = (byte)hundreds;
-                                    _mem[_I + 1] = (byte)tens;
-                                    _mem[_I + 2] = (byte)ones;
+                                    
+                                    _mem[_I] = (byte)((_v[x] / 100) % 10);
+                                    _mem[_I + 1] = (byte)((_v[x] / 10) % 10);
+                                    _mem[_I + 2] = (byte)(_v[x] % 10);
 
                                     _pc += 2;
                                 }
@@ -559,7 +554,7 @@ namespace ChipEightEmu
                                     {
                                         _mem[_I + i] = _v[i];
                                     }
-                                    _I = (ushort)(_I + x + 1); // TODO: check if I needs to be changed
+                                    //_I = (ushort)(_I + x + 1); // TODO: check if I needs to be changed
                                     _pc += 2;
                                 }
                                 break;
@@ -570,7 +565,7 @@ namespace ChipEightEmu
                                     {
                                         _v[i] = _mem[_I + i];
                                     }
-                                    _I = (ushort)(_I + x + 1); // TODO: check if I needs to be changed
+                                    //_I = (ushort)(_I + x + 1); // TODO: check if I needs to be changed
                                     _pc += 2;
                                 }
                                
