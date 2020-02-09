@@ -302,6 +302,7 @@ namespace ChipEightEmu
                                     {
                                         _v[15] = 1;
                                     }
+                                    _v[x] = (byte)(_v[x] - _v[y]);
                                     _pc += 2;
                                 }
                                 break;
@@ -426,7 +427,7 @@ namespace ChipEightEmu
                                 }
 
                                 // write bit to graphics
-                                _gfx[xAddress, yAddress] = (byte)(pixel ? 1 : 0);                                
+                                _gfx[xAddress, yAddress] = (byte)(_gfx[xAddress, yAddress] ^ (byte)(pixel ? 1 : 0));                                
                             }
                         }
 
