@@ -445,7 +445,7 @@ namespace ChipEightEmu
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
                                     if (_keys[_v[x]] == true)
                                     {
-                                        _pc += 4;
+                                        _pc += 2;
                                     }
                                     _pc += 2;
                                 }

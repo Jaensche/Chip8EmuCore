@@ -47,68 +47,68 @@ namespace ChipEightEmu
 
                 switch (key.Key)
                 {
-                    case ConsoleKey.NumPad1:
-                        Memory[0 + 0 * 4] = true;
+                    case ConsoleKey.D1:
+                        Memory[1] = true;
                         break;
 
-                    case ConsoleKey.NumPad2:
-                        Memory[1 + 0 * 4] = true;
+                    case ConsoleKey.D2:
+                        Memory[2] = true;
                         break;
 
-                    case ConsoleKey.NumPad3:
-                        Memory[2 + 0 * 4] = true;
+                    case ConsoleKey.D3:
+                        Memory[3] = true;
                         break;
 
-                    case ConsoleKey.NumPad4:
-                        Memory[3 + 0 * 4] = true;
+                    case ConsoleKey.D4:
+                        Memory[12] = true;
                         break;
 
                     case ConsoleKey.Q:
-                        Memory[0 + 1 * 4] = true;
+                        Memory[4] = true;
                         break;
 
                     case ConsoleKey.W:
-                        Memory[1 + 1 * 4] = true;
+                        Memory[5] = true;
                         break;
 
                     case ConsoleKey.E:
-                        Memory[2 + 1 * 4] = true;
+                        Memory[6] = true;
                         break;
 
                     case ConsoleKey.R:
-                        Memory[3 + 1 * 4] = true;
+                        Memory[13] = true;
                         break;
 
                     case ConsoleKey.A:
-                        Memory[0 + 2 * 4] = true;
+                        Memory[7] = true;
                         break;
 
                     case ConsoleKey.S:
-                        Memory[1 + 2 * 4] = true;
+                        Memory[8] = true;
                         break;
 
                     case ConsoleKey.D:
-                        Memory[2 + 2 * 4] = true;
+                        Memory[9] = true;
                         break;
 
                     case ConsoleKey.F:
-                        Memory[3 + 2 * 4] = true;
+                        Memory[14] = true;
                         break;
 
                     case ConsoleKey.Y:
-                        Memory[0 + 3 * 4] = true;
+                        Memory[10] = true;
                         break;
 
                     case ConsoleKey.X:
-                        Memory[1 + 3 * 4] = true;
+                        Memory[0] = true;
                         break;
 
                     case ConsoleKey.C:
-                        Memory[2 + 3 * 4] = true;
+                        Memory[11] = true;
                         break;
 
                     case ConsoleKey.V:
-                        Memory[3 + 3 * 4] = true;
+                        Memory[15] = true;
                         break;
                 }
             }
