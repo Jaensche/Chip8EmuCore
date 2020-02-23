@@ -1,0 +1,34 @@
+﻿<Window x:Class="Chip8UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Chip8UI"
+        mc:Ignorable="d"
+        Title="Chip8 Emulator" ResizeMode="CanMinimize"
+        Width="740"
+        Height="455">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open" Click="mnuOpenClick"/>
+                <Separator />
+                <MenuItem Header="_Exit" Click="mnuExitClick"/>
+            </MenuItem>
+        </Menu>
+        <Grid DockPanel.Dock="Bottom" Width="740" Height="420" Background="DeepPink">            
+            <Grid >
+                <Image Width="640" Height="320" HorizontalAlignment="Left" VerticalAlignment="Top" Name="screen" />
+
+                <TextBox Width="100" Height="420" HorizontalAlignment="Right" VerticalAlignment="Top" Background="White" Name="richTextBox">
+
+                </TextBox>
+
+                <Grid Width="640" Height="100" HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="White">
+                </Grid>
+            </Grid>
+
+        </Grid>
+    </DockPanel>
+
+</Window>

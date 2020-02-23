@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChipEightEmu", "ChipEightEmu\ChipEightEmu.csproj", "{BB281161-767D-4EBD-B119-07F0DEFB046D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chip8UI", "Chip8UI\Chip8UI.csproj", "{30C797FB-1E24-4685-9808-97879F8F0C19}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChipEightEmu", "ChipEightEmu\ChipEightEmu.csproj", "{BB281161-767D-4EBD-B119-07F0DEFB046D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,6 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30C797FB-1E24-4685-9808-97879F8F0C19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30C797FB-1E24-4685-9808-97879F8F0C19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30C797FB-1E24-4685-9808-97879F8F0C19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30C797FB-1E24-4685-9808-97879F8F0C19}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BB281161-767D-4EBD-B119-07F0DEFB046D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BB281161-767D-4EBD-B119-07F0DEFB046D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB281161-767D-4EBD-B119-07F0DEFB046D}.Release|Any CPU.ActiveCfg = Release|Any CPU

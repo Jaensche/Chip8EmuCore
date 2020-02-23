@@ -426,16 +426,16 @@ namespace ChipEightEmu
                                 xAddress = xAddress % 64;
                                 yAddress = yAddress % 32;
 
-                                bool pixel = (sprite[yCounter] & (0b10000000 >> xCounter)) > 0;
+                                byte pixel = (byte)(sprite[yCounter] & (0b10000000 >> xCounter));
                                 
                                 // set VF to 1 if one pixel is flipped from set to unset
-                                if(_gfx[xAddress, yAddress] == 1 && !pixel)
+                                if(_gfx[xAddress, yAddress] == pixel)
                                 {
                                     V[0x0F] = 1;
                                 }
 
                                 // write bit to graphics
-                                _gfx[xAddress, yAddress] = (byte)(_gfx[xAddress, yAddress] ^ (byte)(pixel ? 1 : 0));                                
+                                _gfx[xAddress, yAddress] = (byte)(_gfx[xAddress, yAddress] ^ (pixel));                                
                             }
                         }
 
@@ -466,6 +466,10 @@ namespace ChipEightEmu
                                     if (_keys[V[x]] == false)
                                     {
                                         PC += 2;
+                                    }
+                                    else
+                                    {
+
                                     }
                                     PC += 2;
                                 }
