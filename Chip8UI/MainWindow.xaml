@@ -11,9 +11,10 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="_Open" Click="mnuOpenClick"/>
+                <MenuItem Header="_Open" Click="OpenClick"/>
+                <MenuItem Header="_Reset" Click="ResetClick"/>
                 <Separator />
-                <MenuItem Header="_Exit" Click="mnuExitClick"/>
+                <MenuItem Header="_Exit" Click="ExitClick"/>
             </MenuItem>
         </Menu>
         <Grid DockPanel.Dock="Bottom" Width="740" Height="420" Background="DeepPink">            

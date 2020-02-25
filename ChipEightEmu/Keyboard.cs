@@ -4,7 +4,7 @@
     {
         public bool[] Memory = new bool[16];
 
-        private object locker = new object();
+        private readonly object locker = new object();
        
         public Keyboard()
         {

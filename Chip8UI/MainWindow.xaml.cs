@@ -45,14 +45,11 @@ namespace Chip8UI
                     0);
             screen.RenderTransform = new MatrixTransform(m);
 
-            InitChip8(@"R:\DEV\Chip8EmuCore\games\Delay Timer Test [Matthew Mikolay, 2010].ch8");
-
             _worker = new BackgroundWorker();
             _worker.DoWork += new DoWorkEventHandler(EmulationWork);
             _worker.WorkerSupportsCancellation = true;
             _worker.WorkerReportsProgress = true;
-            _worker.ProgressChanged += OnProgressChanged;
-            _worker.RunWorkerAsync();           
+            _worker.ProgressChanged += OnProgressChanged;                    
         }
 
         private void InitChip8(string file)
@@ -61,6 +58,11 @@ namespace Chip8UI
             _keyboard = new ChipEightEmu.Keyboard();
             _chip8 = new CPU(ref _graphics.Memory, ref _keyboard.Memory, cyclesPer60Hz);
             _chip8.Load(File.ReadAllBytes(file));
+
+            if (!_worker.IsBusy)
+            {
+                _worker.RunWorkerAsync();
+            }
         }
 
         private void EmulationWork(object sender, DoWorkEventArgs e)
@@ -132,7 +134,7 @@ namespace Chip8UI
             richTextBox.Text = registers;
         }
 
-        private void mnuOpenClick(object sender, RoutedEventArgs e)
+        private void OpenClick(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Chip8 Roms (*.ch8)|*.ch8|All files (*.*)|*.*"; 
@@ -142,9 +144,14 @@ namespace Chip8UI
             }
         }
 
-        private void mnuExitClick(object sender, RoutedEventArgs e)
+        private void ExitClick(object sender, RoutedEventArgs e)
         {
             Application.Current?.Shutdown();
+        }
+
+        private void ResetClick(object sender, RoutedEventArgs e)
+        {
+            _chip8.Reset();
         }
     }
 }
