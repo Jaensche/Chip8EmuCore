@@ -95,6 +95,29 @@ namespace ChipEightEmu
             RedrawFlag = false;
         }
 
+        public void Reset()
+        {
+            PC = 0x200;  // Program counter starts at 0x200
+            I = 0;      // Reset index register
+            SP = 0;      // Reset stack pointer
+
+            // Clear screen
+            ClearScreen();
+
+            // Clear registers V0-VF
+            for (int i = 0; i < V.Length; i++)
+            {
+                V[i] = 0;
+            }            
+
+            // Reset timers
+            DelayTimer = 0;
+            SoundTimer = 0;
+
+            _rand = new Random();
+            RedrawFlag = false;
+        }
+
         public bool Cycle()
         {
             // reset redraw
@@ -294,6 +317,7 @@ namespace ChipEightEmu
                                     {
                                         V[15] = 0;
                                     }
+                                    V[x] = (byte)(V[x] + V[y]);
                                     PC += 2;
                                 }
                                 break;
