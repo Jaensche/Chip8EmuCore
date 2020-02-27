@@ -17,7 +17,7 @@
                 <MenuItem Header="_Exit" Click="ExitClick"/>
             </MenuItem>
         </Menu>
-        <Grid DockPanel.Dock="Bottom" Width="740" Height="420" Background="DeepPink">            
+        <Grid DockPanel.Dock="Bottom" Width="740" Height="420" Background="DeepPink">
             <Grid >
                 <Image Width="640" Height="320" HorizontalAlignment="Left" VerticalAlignment="Top" Name="screen" />
 
@@ -26,6 +26,12 @@
                 </TextBox>
 
                 <Grid Width="640" Height="100" HorizontalAlignment="Left" VerticalAlignment="Bottom" Background="White">
+                    <GroupBox Header="CPU Mods">
+                    <StackPanel>
+                        <CheckBox x:Name="shiftBox" Content="Shift X (not Y)" IsChecked="{Binding ShiftYRegister}"/>
+                        <CheckBox x:Name="increaseBox" Content="Load/Store changes moves pointer" IsChecked="{Binding StoreLoadIncreasesMemPointer}" />
+                    </StackPanel>
+                    </GroupBox>
                 </Grid>
             </Grid>
 

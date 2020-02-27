@@ -30,19 +30,20 @@ namespace Chip8UI
         {
             InitializeComponent();
 
-            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            int cyclesPer60Hz = ClockFrequency / CounterFrequency;
+            _keyboard = new ChipEightEmu.Keyboard();
+            _graphics = new Graphics();
+            _chip8 = new CPU(ref _graphics.Memory, ref _keyboard.Memory, cyclesPer60Hz);
 
+            this.DataContext = this;
+
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
             RenderOptions.SetBitmapScalingMode(screen, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetEdgeMode(screen, EdgeMode.Aliased);
-
-            _graphics = new Graphics();
+                       
             screen.Source = _graphics.Bitmap;
             Matrix m = screen.RenderTransform.Value;
-            m.ScaleAt(
-                    10,
-                    10,
-                    0,
-                    0);
+            m.ScaleAt(10, 10, 0, 0);
             screen.RenderTransform = new MatrixTransform(m);
 
             _worker = new BackgroundWorker();
@@ -54,9 +55,7 @@ namespace Chip8UI
 
         private void InitChip8(string file)
         {
-            int cyclesPer60Hz = ClockFrequency / CounterFrequency;
-            _keyboard = new ChipEightEmu.Keyboard();
-            _chip8 = new CPU(ref _graphics.Memory, ref _keyboard.Memory, cyclesPer60Hz);
+            _chip8.Reset();
             _chip8.Load(File.ReadAllBytes(file));
 
             if (!_worker.IsBusy)
@@ -152,6 +151,30 @@ namespace Chip8UI
         private void ResetClick(object sender, RoutedEventArgs e)
         {
             _chip8.Reset();
+        }
+
+        public bool ShiftYRegister
+        { 
+            get 
+            { 
+                return _chip8.ShiftYRegister; 
+            }
+            set 
+            { 
+                _chip8.ShiftYRegister = value; 
+            } 
+        }
+
+        public bool StoreLoadIncreasesMemPointer
+        {
+            get
+            {
+                return _chip8.StoreLoadIncreasesMemPointer;
+            }
+            set
+            {
+                _chip8.StoreLoadIncreasesMemPointer = value;
+            }
         }
     }
 }

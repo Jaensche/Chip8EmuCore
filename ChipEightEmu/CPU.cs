@@ -22,8 +22,11 @@ namespace ChipEightEmu
         public ushort[] Stack = new ushort[32];
         public ushort SP;
 
+        public bool StoreLoadIncreasesMemPointer = true;
+        public bool ShiftYRegister = true;
+
         public bool RedrawFlag;
-        public int InstructionCounter = 0;
+        public int InstructionCounter;
 
         private byte[,] _gfx;
         private bool[] _keys;
@@ -57,42 +60,7 @@ namespace ChipEightEmu
             _keys = keys;
             _cyclesPer60Hz = cyclesPer60Hz;
 
-            Init();
-        }
-
-        public void Init()
-        {
-            PC = 0x200;  // Program counter starts at 0x200
-            I = 0;      // Reset index register
-            SP = 0;      // Reset stack pointer
-
-            // Clear screen
-            ClearScreen();
-
-            // Clear registers V0-VF
-            for (int i = 0; i < V.Length; i++)
-            {
-                V[i] = 0;
-            }
-
-            // Clear memory
-            for (int i = 0; i < Mem.Length; i++)
-            {
-                Mem[i] = 0;
-            }
-
-            // Load fontset
-            for (int i = 0; i < 80; ++i)
-            {
-                Mem[i] = FONTSET[i];
-            }
-
-            // Reset timers
-            DelayTimer = 0;
-            SoundTimer = 0;
-
-            _rand = new Random();
-            RedrawFlag = false;
+            Reset();
         }
 
         public void Reset()
@@ -108,11 +76,25 @@ namespace ChipEightEmu
             for (int i = 0; i < V.Length; i++)
             {
                 V[i] = 0;
-            }            
+            }
+
+            // Clear registers V0-VF
+            for (int i = 0; i < V.Length; i++)
+            {
+                V[i] = 0;
+            }
+
+            // Load fontset
+            for (int i = 0; i < 80; ++i)
+            {
+                Mem[i] = FONTSET[i];
+            }
 
             // Reset timers
             DelayTimer = 0;
             SoundTimer = 0;
+
+            InstructionCounter = 0;
 
             _rand = new Random();
             RedrawFlag = false;
@@ -309,7 +291,7 @@ namespace ChipEightEmu
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
                                     byte y = (byte)((opcode & 0x00F0) >> 4);
-                                    if ((V[x] + V[y]) > 254)
+                                    if (V[x] > 0xFF - V[y])
                                     {
                                         V[15] = 1;
                                     }
@@ -326,7 +308,7 @@ namespace ChipEightEmu
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
                                     byte y = (byte)((opcode & 0x00F0) >> 4);
-                                    if ((V[x] - V[y]) < 0)
+                                    if (V[x] > V[y])
                                     {
                                         V[15] = 0;
                                     }
@@ -344,7 +326,16 @@ namespace ChipEightEmu
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
                                     byte y = (byte)((opcode & 0x00F0) >> 4);
                                     V[15] = (byte)(V[x] & 0x01);
-                                    V[x] = (byte)(V[x] >> 1);
+
+                                    if (ShiftYRegister)
+                                    {
+                                        V[x] = (byte)(V[y] >> 1);
+                                    }
+                                    else
+                                    {
+                                        V[x] = (byte)(V[x] >> 1);
+                                    }
+
                                     PC += 2;
                                 }
                                 break;
@@ -370,8 +361,18 @@ namespace ChipEightEmu
                             case 0x000E: // 8XYE: Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
                                 {
                                     byte x = (byte)((opcode & 0x0F00) >> 8);
+                                    byte y = (byte)((opcode & 0x00F0) >> 4);
                                     V[15] = (byte)((V[x] & 0x80) >> 7);
-                                    V[x] = (byte)(V[x] << 1);
+                                    
+                                    if (ShiftYRegister)
+                                    {
+                                        V[x] = (byte)(V[y] << 1);
+                                    }
+                                    else
+                                    {
+                                        V[x] = (byte)(V[x] << 1);
+                                    }
+                                    
                                     PC += 2;
                                 }
                                 break;
@@ -451,15 +452,16 @@ namespace ChipEightEmu
                                 yAddress = yAddress % 32;
 
                                 byte pixel = (byte)(sprite[yCounter] & (0b10000000 >> xCounter));
-                                
-                                // set VF to 1 if one pixel is flipped from set to unset
-                                if(_gfx[xAddress, yAddress] == pixel)
-                                {
-                                    V[0x0F] = 1;
-                                }
+                                pixel = (byte)(pixel >> (7 - xCounter));
 
-                                // write bit to graphics
-                                _gfx[xAddress, yAddress] = (byte)(_gfx[xAddress, yAddress] ^ (pixel));                                
+                                if (pixel == 1)
+                                {
+                                    if (_gfx[xAddress, yAddress] == 1)
+                                    {
+                                        V[0x0F] = 1;
+                                    }
+                                    _gfx[xAddress, yAddress] ^= pixel;
+                                }
                             }
                         }
 
@@ -591,7 +593,12 @@ namespace ChipEightEmu
                                     {
                                         Mem[I + i] = V[i];
                                     }
-                                    //_I = (ushort)(_I + x + 1); // TODO: check if I needs to be changed
+
+                                    if (StoreLoadIncreasesMemPointer)
+                                    {
+                                        I = (ushort)(I + x + 1);
+                                    }
+
                                     PC += 2;
                                 }
                                 break;
@@ -602,7 +609,12 @@ namespace ChipEightEmu
                                     {
                                         V[i] = Mem[I + i];
                                     }
-                                    //_I = (ushort)(_I + x + 1); // TODO: check if I needs to be changed
+
+                                    if (StoreLoadIncreasesMemPointer)
+                                    {
+                                        I = (ushort)(I + x + 1);
+                                    }
+
                                     PC += 2;
                                 }
                                

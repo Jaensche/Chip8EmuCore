@@ -1,13 +1,7 @@
 ﻿using System.Windows;
-using ChipEightEmu;
-using System.IO;
-using System.Diagnostics;
 using System;
-using System.Threading;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.ComponentModel;
-using System.Windows.Input;
 
 namespace ChipEightEmu
 {
