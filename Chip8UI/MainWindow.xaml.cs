@@ -26,10 +26,15 @@ namespace Chip8UI
         
         CPU _chip8;
 
+        public bool SingleStep { get; set; }
+        public bool Step { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
 
+            SingleStep = false;
+            Step = false;
             int cyclesPer60Hz = ClockFrequency / CounterFrequency;
             _keyboard = new ChipEightEmu.Keyboard();
             _graphics = new Graphics();
@@ -74,15 +79,21 @@ namespace Chip8UI
             bool emulationIsRunning = true;
             while (emulationIsRunning)
             {
-                stopWatch.Restart();
-                bool redraw = _chip8.Cycle();
-                if (redraw)
+                if ((SingleStep && Step) || !SingleStep)
                 {
-                    worker.ReportProgress(1);
-                }
-                stopWatch.Stop();
+                    Step = false;
+                    stopWatch.Restart();
+                    bool redraw = _chip8.Cycle();
+                    if (redraw)
+                    {
+                        worker.ReportProgress(1);
+                    }
+                    stopWatch.Stop();
+                }                
 
                 ReadKeys();
+
+                WriteRegisters();
 
                 // equal runtime for every cycle
                 long elapsedMilliSeconds = stopWatch.ElapsedTicks / (Stopwatch.Frequency / (1000L));
@@ -118,19 +129,32 @@ namespace Chip8UI
 
         private void OnProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            _graphics.Draw();
-
-            WriteRegisters();           
+            _graphics.Draw();                      
         }              
 
         private void WriteRegisters()
         {
-            string registers = "";
+            string cpuState = "";
             for (int x = 0; x < 16; x++)
             {
-                registers = registers + "V[" + x.ToString("d2") + "]: " + _chip8.V[x] + Environment.NewLine;
+                cpuState = cpuState + "V[" + x.ToString("d2") + "]: " + _chip8.V[x] + Environment.NewLine;
             }
-            richTextBox.Text = registers;
+
+            cpuState = cpuState + "PC: " + _chip8.PC + Environment.NewLine;
+            cpuState = cpuState + "I: " + _chip8.I + Environment.NewLine;
+            cpuState = cpuState + "SP: " + _chip8.SP + Environment.NewLine;
+            cpuState = cpuState + "Delay: " + _chip8.DelayTimer + Environment.NewLine;
+            cpuState = cpuState + "Sound: " + _chip8.SoundTimer + Environment.NewLine;
+
+            try
+            {
+                Application.Current?.Dispatcher.Invoke(delegate
+                {
+                    richTextBox.Text = cpuState;
+                });
+            }
+            catch (Exception)
+            { }            
         }
 
         private void OpenClick(object sender, RoutedEventArgs e)
@@ -175,6 +199,11 @@ namespace Chip8UI
             {
                 _chip8.StoreLoadIncreasesMemPointer = value;
             }
+        }
+
+        private void stepButton_Click(object sender, RoutedEventArgs e)
+        {
+            Step = true;
         }
     }
 }

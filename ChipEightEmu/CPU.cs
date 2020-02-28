@@ -24,7 +24,7 @@ namespace ChipEightEmu
 
         public bool StoreLoadIncreasesMemPointer = true;
         public bool ShiftYRegister = true;
-
+        
         public bool RedrawFlag;
         public int InstructionCounter;
 
