@@ -78,12 +78,6 @@ namespace ChipEightEmu
                 V[i] = 0;
             }
 
-            // Clear registers V0-VF
-            for (int i = 0; i < V.Length; i++)
-            {
-                V[i] = 0;
-            }
-
             // Load fontset
             for (int i = 0; i < 80; ++i)
             {
